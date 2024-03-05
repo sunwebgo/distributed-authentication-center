@@ -1,0 +1,48 @@
+server:
+  port: 10001
+spring:
+  application:
+    name: mc-gateway
+  cloud:
+    gateway:
+      routes:
+        # 路由到mc-auth服务
+        - id: mc-auth
+          uri: lb://mc-auth
+          predicates:
+            - Path=/api/oauth/**, /api/register, /api/login, /api/logout
+          filters:
+            - RewritePath=/api/(?<segment>.*), /$\{segment}
+
+        # 路由到mc-dynamic服务
+        - id: mc-dynamic
+          uri: lb://mc-dynamic
+          predicates:
+            - Path=/api/dynamic/**
+          filters:
+            - RewritePath=/api/(?<segment>.*), /$\{segment}
+
+  main:
+    web-application-type: reactive
+  redis:
+    port: 6379
+    host: 127.0.0.1
+    password: xu.123456
+    database: 0
+    timeout: 10000
+
+security:
+  oauth2:
+    client:
+      client-id: music-community
+      client-secret: xu.123456
+
+# 配置白名单
+secure:
+  ignore:
+    urls: # 配置白名单路径
+      - /api/oauth/**
+      - /api/register
+      - /api/login
+
+

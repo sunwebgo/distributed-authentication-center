@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.mc.auth.mapper.LoginUserMapper">
+
+    <select id="getUserByUsername" resultType="com.mc.common.entity.table.User">
+        select id
+             , username
+             , password
+             , phone
+             , gender
+             , avatar_url
+             , fans_count
+             , follow_count
+             , status
+             , is_deleted
+        from user
+        where username = #{username}
+    </select>
+
+    <select id="getUserRole" resultType="java.lang.Integer">
+        select role_id
+        from user_role
+        where u_id = #{id}
+    </select>
+
+    <select id="getRolePermission" resultType="java.lang.String">
+        SELECT per_path
+        FROM role_permission
+                 LEFT JOIN permission ON role_permission.per_id = permission.id
+        WHERE role_id = #{roleId}
+    </select>
+
+    <select id="getRoleList" resultType="java.lang.Integer">
+        select id
+        from role
+    </select>
+</mapper>

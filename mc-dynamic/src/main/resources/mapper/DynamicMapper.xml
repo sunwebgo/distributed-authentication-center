@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.mc.dynamic.mapper.DynamicMapper">
+
+    <resultMap id="BaseResultMap" type="com.mc.common.entity.table.Dynamic">
+            <id property="id" column="id" jdbcType="BIGINT"/>
+            <result property="uId" column="u_id" jdbcType="BIGINT"/>
+            <result property="uName" column="u_name" jdbcType="VARCHAR"/>
+            <result property="avatarUrl" column="avatar_url" jdbcType="VARCHAR"/>
+            <result property="content" column="content" jdbcType="VARCHAR"/>
+            <result property="type" column="type" jdbcType="VARCHAR"/>
+            <result property="publishDate" column="publish_date" jdbcType="TIMESTAMP"/>
+            <result property="musicId" column="music_id" jdbcType="BIGINT"/>
+            <result property="likeCount" column="like_count" jdbcType="BIGINT"/>
+            <result property="collectCount" column="collect_count" jdbcType="BIGINT"/>
+            <result property="commentCount" column="comment_count" jdbcType="BIGINT"/>
+            <result property="status" column="status" jdbcType="TINYINT"/>
+            <result property="isDeleted" column="is_deleted" jdbcType="TINYINT"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        id,u_id,u_name,
+        avatar_url,content,type,
+        publish_date,music_id,like_count,
+        collect_count,comment_count,status,
+        is_deleted
+    </sql>
+
+
+
+    <select id="getDynamicById" resultType="com.mc.common.entity.table.Dynamic">
+        select
+        <include refid="Base_Column_List"/>
+        from dynamic
+        where id = #{id}
+    </select>
+</mapper>

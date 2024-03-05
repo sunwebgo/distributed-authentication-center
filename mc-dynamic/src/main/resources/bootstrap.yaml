@@ -1,0 +1,11 @@
+spring:
+  cloud:
+    nacos:
+      discovery:
+        server-addr: 127.0.0.1:8848
+        namespace: d7ac9304-eb68-4387-b2e9-95de6fd2db63
+      config:
+        server-addr: 127.0.0.1:8848
+        namespace: d7ac9304-eb68-4387-b2e9-95de6fd2db63
+        file-extension: yaml # 指定配置文件格式
+
