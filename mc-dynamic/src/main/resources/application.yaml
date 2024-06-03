@@ -9,10 +9,33 @@ spring:
   datasource:
     type: com.alibaba.druid.pool.DruidDataSource
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://127.0.0.1:3306/mc?useUnicode=true&characterEncoding=utf-8&useSSL=false&serverTimezone=Asia/Shanghai
+    url: jdbc:mysql://:3306/mc?useUnicode=true&characterEncoding=utf-8&useSSL=false&serverTimezone=Asia/Shanghai
     username: root
     password: xu.123456
-
+  redis:
+    port: 6379
+    host: 
+    password: xu.123456
+    database: 0
+    timeout: 10000
+    #连接间隔 心跳
+    pingConnectionInterval: 1000
+  rabbitmq:
+    host: 
+    port: 5672
+    username: music-community
+    password: xuhuaiang123.
+    #    开启消息发送到Bocker的发布确认
+    publisher-confirm-type: correlated
+    #    开启消息发送到队列的发布确认
+    publisher-returns: true
+    # 开启消息回退
+    template:
+      mandatory: true
+    #     消费端手动ACK
+    listener:
+      simple:
+        acknowledge-mode: manual
 # mybatis配置
 mybatis:
   mapper-locations: classpath:mapper/*.xml #mapper文件路径
@@ -22,6 +45,35 @@ mybatis:
     log-impl: org.apache.ibatis.logging.stdout.StdOutImpl #打印sql日志
     cache-enabled: true #开启二级缓存
 
-logging:
-  level:
-    spring: debug
+# dubbo配置
+dubbo:
+  application:
+    name: mc-dynamic
+    logger: slf4j
+    metadataType: remote # 元数据中心:local本地,remote远程,这里使用远程便于其他服务获取,注意 这里不能使用本地local会读取不到元数据
+  registry:
+    address: nacos://
+    parameters:
+      username: nacos
+      password: nacos
+    check: false
+  metadata-report: # 元数据:用于服务提供者向注册中心发布服务元数据,有助于服务消费者了解服务提供者的详细信息，从而做出更加合理的服务调用决策。
+    address: nacos://
+    parameters:
+      username: nacos
+      password: nacos
+  protocol: #dubbo协议信息
+    name: dubbo # 使用 dubbo 协议通信
+    port: -1 # dubbo 协议端口(-1表示自增端口,从20880开始)
+    serialization: hessian2 # 序列化方式
+  provider:
+    version: 1.0.0
+  consumer:
+    check: false # 禁止消费者启动时检查提供者是否可用
+    version: 1.0.0
+
+# 线程池配置
+thread-pool:
+  core-size: 20 #核心线程数
+  max-size: 200 #最大线程数
+  keep-alive-time: 10 #线程存活时间

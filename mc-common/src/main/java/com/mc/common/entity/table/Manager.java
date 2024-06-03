@@ -11,10 +11,9 @@ import lombok.*;
  * @TableName manager
  * @date 2024/02/03
  */
-@Getter
-@Setter
-@ToString
-@EqualsAndHashCode
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
 public class Manager implements Serializable {
     private static final long serialVersionUID = 1L;
     /**
@@ -31,6 +30,11 @@ public class Manager implements Serializable {
      * 密码
      */
     private String password;
+
+    /**
+     * 头像地址
+     */
+    private String avatarUrl;
 
     /**
      * 状态(0:禁用,1:启用)

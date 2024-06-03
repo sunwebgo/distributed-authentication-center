@@ -2,6 +2,9 @@ package com.mc.common.entity.table;
 
 import java.io.Serializable;
 import java.util.Date;
+
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.*;
 
 /**
@@ -11,10 +14,9 @@ import lombok.*;
  * @TableName dynamic
  * @date 2024/02/03
  */
-@Getter
-@Setter
-@ToString
-@EqualsAndHashCode
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
 public class Dynamic implements Serializable {
     private static final long serialVersionUID = 1L;
     /**
@@ -25,11 +27,13 @@ public class Dynamic implements Serializable {
     /**
      * 发布者id
      */
+    @JsonProperty("uId") // 反序列化时重命名，防止lombok和jackson冲突
     private Long uId;
 
     /**
      * 发布者用户名
      */
+    @JsonProperty("uName") // 反序列化时重命名，防止lombok和jackson冲突
     private String uName;
 
     /**
@@ -43,9 +47,9 @@ public class Dynamic implements Serializable {
     private String content;
 
     /**
-     * 动态类型(日常、音乐、流行、音乐人、最爱的音乐、最爱的歌手)
+     * 动态图片地址
      */
-    private String type;
+    private String imgUrls;
 
     /**
      * 发布日期
@@ -58,19 +62,39 @@ public class Dynamic implements Serializable {
     private Long musicId;
 
     /**
+     * 音乐名称
+     */
+    private String musicName;
+
+    /**
+     * 音乐作者
+     */
+    private String musicAuthor;
+
+    /**
+     * 音乐封面
+     */
+    private String musicCoverUrl;
+
+    /**
+     * 音乐地址
+     */
+    private String musicUrl;
+
+    /**
      * 点赞次数
      */
-    private Long likeCount;
+    private Integer likeCount;
 
     /**
      * 收藏次数
      */
-    private Long collectCount;
+    private Integer collectCount;
 
     /**
      * 评论次数
      */
-    private Long commentCount;
+    private Integer commentCount;
 
     /**
      * 状态(0:禁用,1:启用)

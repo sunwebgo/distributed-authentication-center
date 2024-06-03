@@ -1,6 +1,7 @@
 package com.mc.gateway.entity;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.mc.common.entity.vo.user.UserSimpleInfoVO;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
@@ -18,7 +19,8 @@ import java.util.List;
 @EqualsAndHashCode
 public class TokenCheckInfo {
     private static final long serialVersionUID = 1L;
-    private Integer id;
+
+    private UserSimpleInfoVO userInfo;
 
     @JsonProperty("user_name")
     private String username;

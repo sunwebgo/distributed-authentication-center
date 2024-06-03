@@ -10,7 +10,24 @@ spring:
         - id: mc-auth
           uri: lb://mc-auth
           predicates:
-            - Path=/api/oauth/**, /api/register, /api/login, /api/logout
+            - Path=/api/oauth/**, /api/register, /api/login, /api/revoke
+          filters:
+            - RewritePath=/api/(?<segment>.*), /$\{segment}
+
+        # 路由到mc-music服务
+        - id: mc-music
+          uri: lb://mc-music
+          predicates:
+            - Path=/api/music/**
+          filters:
+            - RewritePath=/api/(?<segment>.*), /$\{segment}
+
+
+        # 路由到mc-user服务
+        - id: mc-user
+          uri: lb://mc-user
+          predicates:
+            - Path=/api/user/**,/api/follow/**
           filters:
             - RewritePath=/api/(?<segment>.*), /$\{segment}
 
@@ -18,7 +35,23 @@ spring:
         - id: mc-dynamic
           uri: lb://mc-dynamic
           predicates:
-            - Path=/api/dynamic/**
+            - Path=/api/dynamic/**,/api/comment/**
+          filters:
+            - RewritePath=/api/(?<segment>.*), /$\{segment}
+
+        # 路由到mc-search服务
+        - id: mc-search
+          uri: lb://mc-search
+          predicates:
+            - Path=/api/search/**
+          filters:
+            - RewritePath=/api/(?<segment>.*), /$\{segment}
+
+        # 路由到mc-third服务
+        - id: mc-third
+          uri: lb://mc-third
+          predicates:
+            - Path=/api/phone/**, /api/oss/policy
           filters:
             - RewritePath=/api/(?<segment>.*), /$\{segment}
 
@@ -26,7 +59,7 @@ spring:
     web-application-type: reactive
   redis:
     port: 6379
-    host: 127.0.0.1
+    host: 
     password: xu.123456
     database: 0
     timeout: 10000
@@ -41,8 +74,45 @@ security:
 secure:
   ignore:
     urls: # 配置白名单路径
-      - /api/oauth/**
       - /api/register
       - /api/login
+      - /api/oauth/check-username
+      - /api/oauth/check-phone
+      - /api/oauth/check-captcha
+      - /api/oauth/captcha/create
+      - /api/oauth/captcha/check
+      - /api/phone/captcha
+      - /api/oss/policy
 
+# dubbo配置
+dubbo:
+  application:
+    name: mc-music
+    logger: slf4j
+    metadataType: remote # 元数据中心:local本地,remote远程,这里使用远程便于其他服务获取,注意 这里不能使用本地local会读取不到元数据
+  registry:
+    address: nacos://
+    parameters:
+      username: nacos
+      password: nacos
+    check: false
+  metadata-report: # 元数据:用于服务提供者向注册中心发布服务元数据,有助于服务消费者了解服务提供者的详细信息，从而做出更加合理的服务调用决策。
+    address: nacos://
+    parameters:
+      username: nacos
+      password: nacos
+  protocol: #dubbo协议信息
+    name: dubbo # 使用 dubbo 协议通信
+    port: -1 # dubbo 协议端口(-1表示自增端口,从20880开始)
+    serialization: hessian2 # 序列化方式
+  provider:
+    version: 1.0.0
+  consumer:
+    check: false # 禁止消费者启动时检查提供者是否可用
+    version: 1.0.0
 
+# 线程池配置
+thread-pool:
+  core-size: 20 #核心线程数
+  max-size: 200 #最大线程数
+  keep-alive-time: 10 #线程存活时间

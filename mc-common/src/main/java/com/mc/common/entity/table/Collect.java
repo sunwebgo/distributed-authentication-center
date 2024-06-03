@@ -12,10 +12,9 @@ import lombok.*;
  * @TableName collect
  * @date 2024/02/03
  */
-@Getter
-@Setter
-@ToString
-@EqualsAndHashCode
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
 public class Collect implements Serializable {
     private static final long serialVersionUID = 1L;
     /**
@@ -36,21 +35,6 @@ public class Collect implements Serializable {
     /**
      * 收藏对象id
      */
-    private Long typeObject;
-
-    /**
-     * 收藏时间
-     */
-    private Date collectDate;
-
-    /**
-     * 状态(0:禁用,1:启用)
-     */
-    private Integer status;
-
-    /**
-     * 是否删除(0:删除,1:未删除)
-     */
-    private Integer isDeleted;
+    private Long objectId;
 
 }

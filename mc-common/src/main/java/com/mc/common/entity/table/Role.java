@@ -1,19 +1,15 @@
 package com.mc.common.entity.table;
 
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.Setter;
-import lombok.ToString;
+import lombok.*;
 
 /**
  * @author Xu huaiang
  * @TableName role
  * @date 2024/02/15
  */
-@Setter
-@Getter
-@ToString
-@EqualsAndHashCode
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
 public class Role {
     private static final long serialVersionUID = 1L;
     /**

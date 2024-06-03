@@ -23,7 +23,7 @@ import java.util.Map;
  */
 @Aspect
 @Component
-public class OAuthTokenAspect {
+public class OAuthCustomResponseAspect {
 
     @Around("execution(* org.springframework.security.oauth2.provider.endpoint.TokenEndpoint.postAccessToken(..))")
     public ResponseEntity handleOAuthResponse(ProceedingJoinPoint joinPoint) throws Throwable {
@@ -46,7 +46,7 @@ public class OAuthTokenAspect {
         newErrorBody.put(CommonConstants.CODE, Http.LOGIN_FAIL.getCode());
         newErrorBody.put(CommonConstants.MESSAGE, Http.LOGIN_FAIL.getMessage());
         try {
-            // 执行TokenEndpoint中的postAccessToken方法
+            // 执行TokenEndpoint中的postAccessToken方法，获取token
             responseEntity = (ResponseEntity<OAuth2AccessToken>) joinPoint.proceed();
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.OK).body(newErrorBody);
@@ -57,7 +57,7 @@ public class OAuthTokenAspect {
         Map<String, Object> data = new HashMap<>();
         data.put(OAuthConstants.TOKEN, originalBody.getValue());
         data.put(OAuthConstants.REFRESH_TOKEN, originalBody.getRefreshToken().getValue());
-
+        data.put(OAuthConstants.USERINFO,originalBody.getAdditionalInformation().get(OAuthConstants.USERINFO));
         Map<String, Object> newBody = new HashMap<>();
         newBody.put(CommonConstants.CODE, Http.LOGIN_SUCCESS.getCode());
         newBody.put(CommonConstants.MESSAGE, Http.LOGIN_SUCCESS.getMessage());
@@ -65,6 +65,4 @@ public class OAuthTokenAspect {
 
         return ResponseEntity.status(HttpStatus.OK).body(newBody);
     }
-
-
 }

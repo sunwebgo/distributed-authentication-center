@@ -2,10 +2,30 @@ spring:
   cloud:
     nacos:
       discovery:
-        server-addr: 127.0.0.1:8848
+        server-addr: 
         namespace: d7ac9304-eb68-4387-b2e9-95de6fd2db63
       config:
-        server-addr: 127.0.0.1:8848
+        server-addr: 
         namespace: d7ac9304-eb68-4387-b2e9-95de6fd2db63
         file-extension: yaml # 指定配置文件格式
 
+seata:
+  enable: true
+  application-id: seata-cilent-dynamic
+  tx-service-group: default_tx_group
+  registry:
+    type: nacos
+    nacos:
+      application: seata-server # seata 服务名
+      # 非本地请修改具体的地址
+      server-addr: 
+      group: SEATA_GROUP
+      namespace: 74d64d4a-9be1-43db-8c82-46d578311c4d
+  config:
+    type: nacos
+    nacos:
+      # nacos ip地址
+      server-addr: 
+      group: SEATA_GROUP
+      data-id: "seataServer.properties"
+      namespace: 74d64d4a-9be1-43db-8c82-46d578311c4d

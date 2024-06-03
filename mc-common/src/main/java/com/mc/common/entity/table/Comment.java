@@ -4,6 +4,7 @@ package com.mc.common.entity.table;
 import java.io.Serializable;
 import java.util.Date;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.*;
 
 /**
@@ -13,10 +14,9 @@ import lombok.*;
  * @TableName comment
  * @date 2024/02/03
  */
-@Getter
-@Setter
-@ToString
-@EqualsAndHashCode
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
 public class Comment implements Serializable {
     private static final long serialVersionUID = 1L;
     /**
@@ -30,34 +30,42 @@ public class Comment implements Serializable {
     private String content;
 
     /**
-     * 父评论id
+     * 评论动态id
      */
-    private Long parentId;
-
-    /**
-     * 回复评论id
-     */
-    private Long responseId;
-
-    /**
-     * 评论类型(1:音乐,2:动态)
-     */
-    private Integer commentType;
-
-    /**
-     * 评论对象id
-     */
-    private Long typeObjectId;
+    private Long commentObjId;
 
     /**
      * 评论者id
      */
+    @JsonProperty("uId") // 反序列化时重命名，防止lombok和jackson冲突
     private Long uId;
 
     /**
-     * 回复者id
+     * 评论者昵称
      */
-    private Long replyId;
+    @JsonProperty("uName") // 反序列化时重命名，防止lombok和jackson冲突
+    private String uName;
+
+    /**
+     * 评论者头像
+     */
+    @JsonProperty("uAvatarUrl") // 反序列化时重命名，防止lombok和jackson冲突
+    private String uAvatarUrl;
+
+    /**
+     * 父评论id
+     */
+    private Long rootId;
+
+    /**
+     * 被回复的评论id
+     */
+    private Long respCommentId;
+
+    /**
+     * 被评论者id
+     */
+    private Long byCommentUId;
 
     /**
      * 评论时间

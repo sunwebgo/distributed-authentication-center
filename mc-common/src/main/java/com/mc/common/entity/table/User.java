@@ -1,11 +1,8 @@
 package com.mc.common.entity.table;
 
 import java.io.Serializable;
-
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.Setter;
-import lombok.ToString;
+import java.time.LocalDate;
+import lombok.*;
 
 /**
  * 用户表
@@ -14,10 +11,9 @@ import lombok.ToString;
  * @TableName user
  * @date 2024/02/03
  */
-@Setter
-@Getter
-@ToString
-@EqualsAndHashCode
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
 public class User implements Serializable {
     private static final long serialVersionUID = 1L;
     /**
@@ -51,14 +47,14 @@ public class User implements Serializable {
     private String avatarUrl;
 
     /**
-     * 粉丝数
+     * 生日
      */
-    private Long fansCount;
+    private LocalDate birthday;
 
     /**
-     * 关注数
+     * 个性签名
      */
-    private Long followCount;
+    private String signature;
 
     /**
      * 状态(0:禁用,1:启用)

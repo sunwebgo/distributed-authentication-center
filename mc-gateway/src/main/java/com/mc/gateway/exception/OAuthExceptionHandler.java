@@ -25,7 +25,6 @@ public class OAuthExceptionHandler {
         response.getHeaders().add(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE);
         ObjectMapper objectMapper = new ObjectMapper();
         ResponseResult responseResult = new ResponseResult();
-
         responseResult = ResponseResult.error(Http.LOGIN_EXPIRED.getCode(), msg);
         String resultInfoJson = null;
         DataBuffer buffer = null;

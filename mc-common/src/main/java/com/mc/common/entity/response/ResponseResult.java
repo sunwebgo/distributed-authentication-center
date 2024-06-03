@@ -1,16 +1,19 @@
 package com.mc.common.entity.response;
 
 
+import java.io.Serializable;
+
 /**
  * @author Xu huaiang
  * @description 统一响应结果
  * @date 2024/02/05
  */
-public class ResponseResult {
+public class ResponseResult<T> implements Serializable {
+    private static final long serialVersionUID = 1L;
 
     private Integer code;
     private String message;
-    private Object data;
+    private T data;
 
     public ResponseResult() {
     }
@@ -20,7 +23,7 @@ public class ResponseResult {
         this.message = message;
     }
 
-    public ResponseResult(Integer code, String message, Object data) {
+    public ResponseResult(Integer code, String message, T data) {
         this.code = code;
         this.message = message;
         this.data = data;
@@ -30,8 +33,16 @@ public class ResponseResult {
         return new ResponseResult(200, "success");
     }
 
+    public static ResponseResult success(String message) {
+        return new ResponseResult(200, message);
+    }
+
     public static ResponseResult success(Object data) {
         return new ResponseResult(200, "success", data);
+    }
+
+    public static ResponseResult success(String message, Object data) {
+        return new ResponseResult(200, message, data);
     }
 
     public static ResponseResult error() {
@@ -68,11 +79,11 @@ public class ResponseResult {
         return this;
     }
 
-    public Object getData() {
+    public T getData() {
         return data;
     }
 
-    public ResponseResult setData(Object data) {
+    public ResponseResult setData(T data) {
         this.data = data;
         return this;
     }

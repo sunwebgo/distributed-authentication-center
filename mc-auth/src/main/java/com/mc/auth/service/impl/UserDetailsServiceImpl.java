@@ -1,10 +1,13 @@
 package com.mc.auth.service.impl;
 
+import com.mc.common.constants.CommonConstants;
+import com.mc.common.dubbo.UserServiceInterface;
+import com.mc.common.entity.response.ResponseResult;
 import com.mc.common.entity.table.User;
 import com.mc.auth.entity.LoginUser;
-import com.mc.auth.mapper.LoginUserMapper;
+import com.mc.common.enums.Http;
 import org.apache.commons.lang3.ObjectUtils;
-import org.apache.commons.lang3.StringUtils;
+import org.apache.dubbo.config.annotation.DubboReference;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -12,25 +15,44 @@ import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ThreadPoolExecutor;
 
 
 @Service
 public class UserDetailsServiceImpl implements UserDetailsService {
 
+    @DubboReference(timeout = 2000)
+    private UserServiceInterface userServiceInterface;
+
     @Resource
-    private LoginUserMapper loginUserMapper;
+    private ThreadPoolExecutor threadPoolExecutor;
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        if (StringUtils.isBlank(username)) {
-            throw new UsernameNotFoundException("用户名不能为空");
-        }
-        User user = loginUserMapper.getUserByUsername(username);
-        if (ObjectUtils.isEmpty(user)) {
-            throw new UsernameNotFoundException("用户不存在");
+        // 异步调用用户服务接口
+        CompletableFuture<ResponseResult<User>> response = userServiceInterface.getUserByUsername(username)
+                .whenCompleteAsync((result, throwable) -> {
+            if (!result.getCode().equals(CommonConstants.SUCCESS_CODE)
+                    || ObjectUtils.isEmpty(result.getData())) {
+                throw new RuntimeException(result.getMessage());
+            }
+        }, threadPoolExecutor);
+        User user = null;
+        try {
+            // 获取用户信息
+            user = response.get().getData();
+        } catch (Exception e) {
+            throw new RuntimeException(Http.USER_INFO_FAIL.getMessage());
         }
         //查询用户角色
-        List<Integer> roles = loginUserMapper.getUserRole(user.getId());
+        CompletableFuture<ResponseResult<List<Integer>>> userRole = userServiceInterface.getUserRole(user.getId());
+        List<Integer> roles = null;
+        try {
+            roles = userRole.get().getData();
+        } catch (Exception e) {
+            throw new RuntimeException(Http.GET_USER_ROLE_FAIL.getMessage());
+        }
         return new LoginUser(user, roles);
     }
 }

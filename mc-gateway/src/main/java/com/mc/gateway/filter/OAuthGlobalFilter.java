@@ -2,14 +2,19 @@ package com.mc.gateway.filter;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mc.common.constants.CacheConstants;
+import com.mc.common.constants.CommonConstants;
 import com.mc.common.constants.OAuthConstants;
+import com.mc.common.dubbo.UserServiceInterface;
+import com.mc.common.entity.response.ResponseResult;
 import com.mc.common.enums.Http;
 import com.mc.common.utils.RedisUtil;
 import com.mc.gateway.config.IgnoreUrlsConfig;
 import com.mc.gateway.entity.TokenCheckInfo;
 import com.mc.gateway.exception.OAuthExceptionHandler;
 import com.mc.gateway.handle.RefreshTokenHandle;
+import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.dubbo.config.annotation.DubboReference;
 import org.springframework.cloud.gateway.filter.GatewayFilterChain;
 import org.springframework.cloud.gateway.filter.GlobalFilter;
 import org.springframework.core.Ordered;
@@ -23,6 +28,8 @@ import reactor.core.publisher.Mono;
 
 import javax.annotation.Resource;
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ThreadPoolExecutor;
 
 /**
  * @author Xu huaiang
@@ -44,12 +51,31 @@ public class OAuthGlobalFilter implements GlobalFilter, Ordered {
     @Resource
     private RefreshTokenHandle refreshTokenHandle;
 
+    @DubboReference
+    private UserServiceInterface userServiceInterface;
+
+    @Resource
+    private ThreadPoolExecutor threadPoolExecutor;
+
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
         // 判断当前的请求是否在白名单中
         AntPathMatcher pathMatcher = new AntPathMatcher();
         boolean flag = false;
         String path = exchange.getRequest().getURI().getPath();
+        // 对特殊接口进行判断
+        // 如果查询热门音乐接口或者是音乐列表或是动态列表，并且携带了用户id，则不放行（携带用户id，判断用户的点赞情况）
+        if ((CommonConstants.API_MUSIC_HOT.equals(path)
+                || CommonConstants.API_MUSIC_LIST.equals(path)
+                || CommonConstants.API_SEARCH_MUSIC.equals(path)
+                || CommonConstants.API_SEARCH_DYNAMIC.equals(path)
+                || CommonConstants.API_DYNAMIC_LIST.equals(path)
+                || CommonConstants.API_COMMENT_LIST.equals(path))
+                && (!exchange.getRequest().getQueryParams().containsKey(CommonConstants.UID)
+                || ObjectUtils.isEmpty(exchange.getRequest().getQueryParams().getFirst(CommonConstants.UID)))
+        ) {
+            return chain.filter(exchange);
+        }
         for (String url : ignoreUrlsConfig.getUrls()) {
             if (pathMatcher.match(url, path)) {
                 flag = true;
@@ -66,6 +92,9 @@ public class OAuthGlobalFilter implements GlobalFilter, Ordered {
         try {
             token = exchange.getRequest().getHeaders().getFirst(OAuthConstants.AUTHORIZATION).replace(OAuthConstants.BEARER, "");
             refresh_token = exchange.getRequest().getHeaders().getFirst(OAuthConstants.REFRESH_TOKEN).trim();
+            if (StringUtils.isBlank(token) || StringUtils.isBlank(refresh_token)) {
+                return oAuthExceptionHandler.writeError(exchange, Http.NEED_LOGIN.getMessage());
+            }
         } catch (Exception e) {
             return oAuthExceptionHandler.writeError(exchange, Http.NEED_LOGIN.getMessage());
         }
@@ -78,11 +107,26 @@ public class OAuthGlobalFilter implements GlobalFilter, Ordered {
             if (entity.getStatusCode() != HttpStatus.OK || StringUtils.isBlank(entity.getBody())) {
                 return refreshTokenHandle.filter(exchange, chain, refresh_token);
             }
-            String requestPath = exchange.getRequest().getPath().value(); // 获取请求路径
+            String requestPath = exchange.getRequest().getPath().value().replace("/api", ""); // 获取请求路径
             ObjectMapper objectMapper = new ObjectMapper();
             TokenCheckInfo tokenCheckInfo = objectMapper.readValue(entity.getBody(), TokenCheckInfo.class);
             // 获取用户权限
             Set<String> permissionList = new HashSet<>();
+            // 如果权限缓存为空的话重建缓存
+            if (ObjectUtils.isEmpty(RedisUtil.hashGet(CacheConstants.ROLE_PERMISSION, CacheConstants.ROLE_HASH_KEY_TWO))) {
+                CompletableFuture<ResponseResult<Map<Integer, List<String>>>> response =
+                        userServiceInterface.getRolePermissionList()
+                                .whenCompleteAsync((result, throwable) -> {
+                                    if (!result.getCode().equals(CommonConstants.SUCCESS_CODE)) {
+                                        throw new RuntimeException(Http.ROLE_PERMISSION_INIT_FAIL.getMessage());
+                                    }
+                                }, threadPoolExecutor);
+                // 获取角色权限列表
+                Map<Integer, List<String>> rolePermissionMap = response.get().getData();
+                rolePermissionMap.forEach((k, v) -> {
+                    RedisUtil.hashPut(CacheConstants.ROLE_PERMISSION, CacheConstants.ROLE_HASH_KEY + k, String.join(",", v));
+                });
+            }
             tokenCheckInfo.getRoles().forEach(roleId -> {
                 String permission = (String) RedisUtil.hashGet(CacheConstants.ROLE_PERMISSION, CacheConstants.ROLE_HASH_KEY + roleId);
                 if (StringUtils.isNotBlank(permission)) {

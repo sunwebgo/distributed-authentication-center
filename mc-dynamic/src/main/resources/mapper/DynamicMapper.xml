@@ -5,35 +5,167 @@
 <mapper namespace="com.mc.dynamic.mapper.DynamicMapper">
 
     <resultMap id="BaseResultMap" type="com.mc.common.entity.table.Dynamic">
-            <id property="id" column="id" jdbcType="BIGINT"/>
-            <result property="uId" column="u_id" jdbcType="BIGINT"/>
-            <result property="uName" column="u_name" jdbcType="VARCHAR"/>
-            <result property="avatarUrl" column="avatar_url" jdbcType="VARCHAR"/>
-            <result property="content" column="content" jdbcType="VARCHAR"/>
-            <result property="type" column="type" jdbcType="VARCHAR"/>
-            <result property="publishDate" column="publish_date" jdbcType="TIMESTAMP"/>
-            <result property="musicId" column="music_id" jdbcType="BIGINT"/>
-            <result property="likeCount" column="like_count" jdbcType="BIGINT"/>
-            <result property="collectCount" column="collect_count" jdbcType="BIGINT"/>
-            <result property="commentCount" column="comment_count" jdbcType="BIGINT"/>
-            <result property="status" column="status" jdbcType="TINYINT"/>
-            <result property="isDeleted" column="is_deleted" jdbcType="TINYINT"/>
+        <id property="id" column="id" jdbcType="BIGINT"/>
+        <result property="uId" column="u_id" jdbcType="BIGINT"/>
+        <result property="uName" column="u_name" jdbcType="VARCHAR"/>
+        <result property="avatarUrl" column="avatar_url" jdbcType="VARCHAR"/>
+        <result property="content" column="content" jdbcType="VARCHAR"/>
+        <result property="imgUrls" column="img_urls" jdbcType="VARCHAR"/>
+        <result property="musicId" column="music_id" jdbcType="BIGINT"/>
+        <result property="musicName" column="music_name" jdbcType="VARCHAR"/>
+        <result property="musicAuthor" column="music_author" jdbcType="VARCHAR"/>
+        <result property="musicUrl" column="music_url" jdbcType="VARCHAR"/>
+        <result property="musicCoverUrl" column="music_cover_url" jdbcType="VARCHAR"/>
+        <result property="publishDate" column="publish_date" jdbcType="TIMESTAMP"/>
+        <result property="likeCount" column="like_count" jdbcType="BIGINT"/>
+        <result property="collectCount" column="collect_count" jdbcType="BIGINT"/>
+        <result property="commentCount" column="comment_count" jdbcType="BIGINT"/>
+        <result property="status" column="status" jdbcType="TINYINT"/>
+        <result property="isDeleted" column="is_deleted" jdbcType="TINYINT"/>
     </resultMap>
 
-    <sql id="Base_Column_List">
-        id,u_id,u_name,
-        avatar_url,content,type,
-        publish_date,music_id,like_count,
-        collect_count,comment_count,status,
-        is_deleted
+    <resultMap id="DynamicCacheDataTOMap" type="com.mc.common.entity.to.dynamic.DynamicCacheDataTO">
+        <id property="id" column="id" jdbcType="BIGINT"/>
+        <result property="uId" column="u_id" jdbcType="BIGINT"/>
+        <result property="uName" column="u_name" jdbcType="VARCHAR"/>
+    </resultMap>
+
+    <sql id="dynamic_fields">
+        id
+        ,u_id,u_name,
+        avatar_url,content,
+        publish_date,music_id,music_author,music_name,
+        music_url,music_cover_url,img_urls,
+        like_count,collect_count,comment_count,
+        status,is_deleted
     </sql>
-
-
 
     <select id="getDynamicById" resultType="com.mc.common.entity.table.Dynamic">
         select
-        <include refid="Base_Column_List"/>
-        from dynamic
+        <include refid="dynamic_fields"/>
+        from mc_dynamic
         where id = #{id}
+    </select>
+
+    <select id="getAllDynamic" resultType="com.mc.common.entity.table.Dynamic">
+        select
+        <include refid="dynamic_fields"/>
+        from mc_dynamic
+        where is_deleted = 1
+    </select>
+
+    <select id="dynamicCount" resultType="java.lang.Integer">
+        select count(1)
+        from mc_dynamic
+        <where>
+            <if test="uId != null">
+                and u_id = #{uId}
+            </if>
+            and status = 1
+            and is_deleted = 1
+        </where>
+    </select>
+
+    <select id="dynamicMapper" resultType="com.mc.common.entity.table.Dynamic">
+        select
+        <include refid="dynamic_fields"/>
+        from mc_dynamic
+        <where>
+            <if test="uId != null">
+                and u_id = #{uId}
+            </if>
+            and status = 1
+            and is_deleted = 1
+        </where>
+        order by publish_date desc
+        limit #{start},#{size}
+    </select>
+
+    <select id="getDynamicCacheData" resultMap="DynamicCacheDataTOMap">
+        select id,u_id,u_name,content,like_count
+        from mc_dynamic
+        <where>
+            status = 1
+            and is_deleted = 1
+            <if test="id != null">
+                and id = #{id}
+            </if>
+        </where>
+    </select>
+
+    <update id="updateLikeCount">
+        update mc_dynamic
+        set like_count = #{likeCount}
+        where id = #{dId}
+    </update>
+
+    <select id="getDynamicByIds" resultType="com.mc.common.entity.table.Dynamic">
+        select
+        <include refid="dynamic_fields"/>
+        from mc_dynamic
+        where id in
+        <foreach collection="ids" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+        and status = 1
+        and is_deleted = 1
+    </select>
+
+    <select id="dynamicIsExist" resultType="java.lang.Boolean">
+        select id
+        from mc_dynamic
+        where id = #{id}
+          and status = 1
+          and is_deleted = 1
+    </select>
+
+    <insert id="addDynamic">
+        insert into mc_dynamic
+        (id,
+         u_id,
+         u_name,
+         avatar_url,
+         content,
+         img_urls,
+         music_id,
+         music_name,
+         music_author,
+         music_cover_url,
+         music_url)
+        values (#{id},
+                #{uId},
+                #{uName},
+                #{avatarUrl},
+                #{content},
+                COALESCE(#{imgUrls}),
+                COALESCE(#{musicId}),
+                COALESCE(#{musicName}),
+                COALESCE(#{musicAuthor}),
+                COALESCE(#{musicCoverUrl}),
+                COALESCE(#{musicUrl}))
+    </insert>
+
+    <delete id="deleteDynamic">
+        delete
+        from mc_dynamic
+        where id = #{dynamicId}
+          and u_id = #{uId}
+          and is_deleted = 1
+    </delete>
+
+    <select id="getDynamicUserInfo" resultType="java.lang.Long">
+        select u_id
+        from mc_dynamic
+        where id = #{id}
+          and status = 1
+          and is_deleted = 1
+    </select>
+
+    <select id="selectContent" resultType="java.lang.String">
+        select content
+        from mc_dynamic
+        where id = #{id}
+          and status = 1
+          and is_deleted = 1
     </select>
 </mapper>

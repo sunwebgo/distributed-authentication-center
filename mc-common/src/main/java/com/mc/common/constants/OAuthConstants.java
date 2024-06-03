@@ -2,6 +2,11 @@ package com.mc.common.constants;
 
 public class OAuthConstants {
     /**
+     * 用户不存在
+     */
+    public static final String USER_NOT_FOUND = "用户不存在";
+
+    /**
      * client_id
      */
     public static final String CLIENT_ID = "client_id";
@@ -66,5 +71,15 @@ public class OAuthConstants {
      * refresh_info
      */
     public static final String REFRESH_INFO = "refresh_info";
+
+    /**
+     * Access-Control-Expose-Headers
+     */
+    public static final String ACCESS_CONTROL_EXPOSE_HEADERS = "Access-Control-Expose-Headers";
+
+    /**
+     * userInfo
+     */
+    public static final String USERINFO = "userInfo";
 
 }

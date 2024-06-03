@@ -16,6 +16,11 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         return new BCryptPasswordEncoder();
     }
 
+    /**
+     * @return {@link AuthenticationManager}
+     * @description 认证管理对象
+     * @throws Exception
+     */
     @Bean
     public AuthenticationManager authenticationManagerBean() throws Exception {
         return super.authenticationManagerBean();
@@ -25,7 +30,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     protected void configure(HttpSecurity http) throws Exception {
         http.csrf().disable().authorizeRequests()
                 // 放行的请求
-                .antMatchers("/oauth/**").permitAll()
+                .antMatchers("/**").permitAll()
                 // 其他请求必须认证才能访问
                 .anyRequest().authenticated();
     }

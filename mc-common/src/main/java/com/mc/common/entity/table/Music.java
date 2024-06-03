@@ -2,9 +2,16 @@ package com.mc.common.entity.table;
 
 
 import java.io.Serializable;
+import java.time.LocalDate;
 import java.util.Date;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateTimeDeserializer;
+import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateTimeSerializer;
 import lombok.*;
+import org.springframework.format.annotation.DateTimeFormat;
 
 /**
  * 音乐表
@@ -13,10 +20,9 @@ import lombok.*;
  * @TableName music
  * @date 2024/02/03
  */
-@Getter
-@Setter
-@ToString
-@EqualsAndHashCode
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
 public class Music implements Serializable {
     private static final long serialVersionUID = 1L;
     /**
@@ -50,39 +56,14 @@ public class Music implements Serializable {
     private String album;
 
     /**
-     * 歌词
-     */
-    private String lyric;
-
-    /**
-     * 发布日期
-     */
-    private Date publishDate;
-
-    /**
-     * 上传日期
-     */
-    private Date pushDate;
-
-    /**
-     * 类型
+     * 类型(1:流行,2:摇滚,3:民谣,4:电子,5:轻音乐)'
      */
     private Integer type;
 
     /**
      * 点赞次数
      */
-    private Long likeCount;
-
-    /**
-     * 收藏次数
-     */
-    private Long collectCount;
-
-    /**
-     * 评论次数
-     */
-    private Long commentCount;
+    private Integer likeCount;
 
     /**
      * 状态(0:禁用,1:启用)

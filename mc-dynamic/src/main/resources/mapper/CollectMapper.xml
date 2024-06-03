@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.mc.dynamic.mapper.CollectMapper">
+
+    <resultMap id="BaseResultMap" type="com.mc.common.entity.table.Collect">
+        <id property="id" column="id" jdbcType="BIGINT"/>
+        <result property="uId" column="u_id" jdbcType="BIGINT"/>
+        <result property="type" column="type" jdbcType="TINYINT"/>
+        <result property="objectId" column="object_id" jdbcType="BIGINT"/>
+    </resultMap>
+
+    <sql id="collect_fields">
+        id
+        ,u_id,type,object_id
+    </sql>
+
+    <insert id="collect">
+        insert into mc_collect (u_id, type, object_id)
+        values (#{uId}, #{type}, #{objectId})
+    </insert>
+
+    <delete id="cancelCollect">
+        delete
+        from mc_collect
+        where u_id = #{uId}
+          and type = #{type}
+          and object_id = #{objectId}
+    </delete>
+
+    <select id="collectList" resultType="java.lang.Long">
+        select object_id
+        from mc_collect
+        where u_id = #{uId}
+          and type = #{type}
+          limit #{start}, #{size}
+    </select>
+
+    <select id="collectCount" resultType="java.lang.Integer">
+        select count(1)
+        from mc_collect
+        where u_id = #{uId}
+          and type = #{type}
+    </select>
+</mapper>

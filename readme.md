@@ -196,7 +196,7 @@ spring:
     password: xu.123456
   redis:
     port: 6379
-    host: 121.37.136.237
+    host: 
     password: xu.123456
     database: 0
     timeout: 10000

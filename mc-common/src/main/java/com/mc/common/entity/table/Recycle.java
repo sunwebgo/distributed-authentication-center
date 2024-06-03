@@ -3,10 +3,7 @@ package com.mc.common.entity.table;
 import java.io.Serializable;
 import java.util.Date;
 
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.Setter;
-import lombok.ToString;
+import lombok.*;
 
 /**
  * 回收站表
@@ -15,10 +12,9 @@ import lombok.ToString;
  * @TableName recycle
  * @date 2024/02/03
  */
-@Setter
-@Getter
-@ToString
-@EqualsAndHashCode
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
 public class Recycle implements Serializable {
     private static final long serialVersionUID = 1L;
 

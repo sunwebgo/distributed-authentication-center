@@ -1,0 +1,171 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.mc.dynamic.mapper.CommentMapper">
+
+    <resultMap id="BaseResultMap" type="com.mc.common.entity.table.Comment">
+        <id property="id" column="id" jdbcType="BIGINT"/>
+        <result property="content" column="content" jdbcType="VARCHAR"/>
+        <result property="commentObjId" column="comment_obj_id" jdbcType="BIGINT"/>
+        <result property="uId" column="u_id" jdbcType="BIGINT"/>
+        <result property="uName" column="u_name" jdbcType="VARCHAR"/>
+        <result property="uAvatarUrl" column="u_avatar_url" jdbcType="VARCHAR"/>
+        <result property="rootId" column="root_id" jdbcType="BIGINT"/>
+        <result property="respCommentId" column="resp_comment_id" jdbcType="BIGINT"/>
+        <result property="byCommentUId" column="by_comment_u_id" jdbcType="BIGINT"/>
+        <result property="commentDate" column="comment_date" jdbcType="TIMESTAMP"/>
+        <result property="status" column="status" jdbcType="TINYINT"/>
+        <result property="isDeleted" column="is_deleted" jdbcType="TINYINT"/>
+    </resultMap>
+
+    <sql id="comment_fields">
+        id
+        ,content,comment_obj_id,u_id,u_name,u_avatar_url,root_id,resp_comment_id,by_comment_u_id,comment_date
+    </sql>
+    <insert id="addComment">
+        insert into mc_comment
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="id != null">
+                id,
+            </if>
+            <if test="content != null">
+                content,
+            </if>
+            <if test="commentObjId != null">
+                comment_obj_id,
+            </if>
+            <if test="uId != null">
+                u_id,
+            </if>
+            <if test="uName != null">
+                u_name,
+            </if>
+            <if test="uAvatarUrl != null">
+                u_avatar_url,
+            </if>
+            <if test="rootId != null">
+                root_id,
+            </if>
+            <if test="respCommentId != null">
+                resp_comment_id,
+            </if>
+            <if test="byCommentUId != null">
+                by_comment_u_id,
+            </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="id != null">
+                #{id},
+            </if>
+            <if test="content != null">
+                #{content},
+            </if>
+            <if test="commentObjId != null">
+                #{commentObjId},
+            </if>
+            <if test="uId != null">
+                #{uId},
+            </if>
+            <if test="uName != null">
+                #{uName},
+            </if>
+            <if test="uAvatarUrl != null">
+                #{uAvatarUrl},
+            </if>
+            <if test="rootId != null">
+                #{rootId},
+            </if>
+            <if test="respCommentId != null">
+                #{respCommentId},
+            </if>
+            <if test="byCommentUId != null">
+                #{byCommentUId},
+            </if>
+        </trim>
+    </insert>
+
+    <select id="commentIsExist" resultType="java.lang.Boolean">
+        select id
+        from mc_comment
+        where id = #{id}
+          and status = 1
+          and is_deleted = 1
+    </select>
+
+    <select id="getCommentTotal" resultType="java.lang.Integer">
+        select count(1)
+        from mc_comment
+        <where>
+            comment_obj_id = #{dynamicId}
+            <if test="rootComment != null and rootComment != ''">
+                and root_id is null
+            </if>
+            and status = 1
+            and is_deleted = 1
+        </where>
+    </select>
+
+    <select id="getComment" resultType="com.mc.common.entity.vo.comment.CommentVO">
+        select
+        <include refid="comment_fields"/>
+        from mc_comment
+        where comment_obj_id = #{dynamicId}
+        and root_id is null
+        and status = 1
+        and is_deleted = 1
+        order by comment_date desc
+        limit #{start},#{size}
+    </select>
+
+    <select id="getChildren" resultType="com.mc.common.entity.vo.comment.CommentVO">
+        select
+        <include refid="comment_fields"/>
+        from mc_comment
+        where root_id = #{rootId}
+        and status = 1
+        and is_deleted = 1
+        order by comment_date desc
+    </select>
+
+    <select id="commentIsExistPlus" resultType="java.lang.Boolean">
+        select id
+        from mc_comment
+        where id = #{commentId}
+          and u_id = #{uId}
+    </select>
+
+    <delete id="deleteComment">
+        delete
+        from mc_comment
+        where id = #{id}
+        or root_id = #{id}
+        or resp_comment_id = #{id}
+    </delete>
+
+    <select id="limitComment" resultType="java.lang.Long">
+        select id
+        from mc_comment
+        where by_comment_u_id = #{byCommentUId}
+          and status = 1
+          and is_deleted = 1
+        order by comment_date desc
+            limit #{start}, #{size}
+    </select>
+
+    <select id="selectContent" resultType="java.lang.String">
+        select content
+        from mc_dynamic
+        where id = #{id}
+          and status = 1
+          and is_deleted = 1
+    </select>
+
+    <select id="getByCommentUId" resultType="java.lang.Long">
+        select by_comment_u_id
+        from mc_comment
+        where id = #{id}
+          and status = 1
+          and is_deleted = 1
+    </select>
+</mapper>

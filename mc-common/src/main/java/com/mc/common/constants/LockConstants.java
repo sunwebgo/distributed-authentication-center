@@ -9,14 +9,29 @@ import java.util.concurrent.TimeUnit;
  */
 public class LockConstants {
     /**
-     *  分布式锁过期时间
+     *  分布式锁过期时间10秒
      */
-    public static final Integer LOCK_EXPIRE = 10;
+    public static final Integer LOCK_EXPIRE_TEN = 10;
+
+    /**
+     *  分布式锁过期时间30秒
+     */
+    public static final Integer LOCK_EXPIRE_THIRTY = 30;
 
     /**
      *  初始化角色权限锁
      */
     public static final String INIT_ROLE_PERMISSION_LOCK = "initRolePermissionLock";
+
+    /**
+     *  初始化Elastic数据锁
+     */
+    public static final String INIT_ELASTIC_DATA_LOCK = "initElasticDataLock";
+
+    /**
+     *  初始化音乐数据锁
+     */
+    public static final String INIT_MUSIC_DATA_LOCK = "initMusicDataLock";
 
 
 
